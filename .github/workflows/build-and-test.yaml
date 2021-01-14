@@ -24,12 +24,17 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-18.04
     timeout-minutes: 90
     strategy:
       matrix:
-        go-version: [1.14, 1.15]
+        platform:
+          - ubuntu-18.04
+          - macos-latest
+        go-version:
+          - 1.14
+          - 1.15
       fail-fast: true
+    runs-on: ${{ matrix.platform }}
     steps:
       - name: Set up Go ${{ matrix.go-version }}
         uses: actions/setup-go@v2

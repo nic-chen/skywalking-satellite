@@ -86,7 +86,7 @@ build: deps linux darwin
 .PHONY: check
 check:
 	$(MAKE) clean
-	$(OUT_DIR)/skywalking-satellite-latest-linux-amd64 docs
+	$(OUT_DIR)/$(BINARY)-$(VERSION)-$(shell echo $(OS) | tr A-Z a-z)-$(ARCH) docs
 	$(GO) mod tidy &> /dev/null
 	@if [ ! -z "`git status -s |grep -v 'go.mod\|go.sum'`" ]; then \
 		echo "Following files are not consistent with CI:"; \
