@@ -201,9 +201,9 @@
    limitations under the License.
 
 =======================================================================
-Apache SkyWalking Subcomponents:
+Apache SkyWalking Satellite Subcomponents:
 
-The Apache SkyWalking project contains subcomponents with separate copyright
+Apache SkyWalking Satellite project contains subcomponents with separate copyright
 notices and license terms. Your use of the source code for the these
 subcomponents is subject to the terms and conditions of the following
 licenses.
@@ -214,7 +214,8 @@ Apache 2.0 licenses
 
 The following components are provided under the Apache License. See project link for details.
 The text of each license is the standard Apache 2.0 license.
-
+    client_golang (prometheus) v1.9.0: https://github.com/prometheus/client_golang Apache 2.0
+    grpc (google) v1.34.0: https://google.golang.org/grpc Apache 2.0
 
 ========================================================================
 BSD licenses
@@ -222,5 +223,22 @@ BSD licenses
 
 The following components are provided under a BSD license. See project link for details.
 The text of each license is also included at licenses/LICENSE-[project].txt.
+    google (go-cmp) v0.5.4 https://github.com/google/go-cmp BSD
+    golang(protobuf) v1.4.3   https://github.com/golang/protobuf BSD
+    google(protobuf v1.25.0 https://google.golang.org/protobuf BSD
+
+========================================================================
+MIT licenses
+========================================================================
+
+The following components are provided under the MIT License. See project link for details.
+The text of each license is also included at licenses/LICENSE-[project].txt.
+
+	sirupsen (logrus) v1.7.0: https://github.com/sirupsen/logrus MIT
+	spf13 (viper) v1.7.1: https://github.com/spf13/viper MIT
+	urfave (cli) v2.3.0: https://github.com/urfave/cli MIT
+	grandecola (mmap) v0.6.0: https://github.com/grandecola/mmap MIT
+    grandecola (bigqueue) v0.4.0: https://github.com/grandecola/bigqueue MIT
+    Shopify (sarama) v1.27.2: https://github.com/Shopify/sarama  MIT
 
 

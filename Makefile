@@ -17,14 +17,17 @@
 
 VERSION ?= latest
 OUT_DIR = bin
-BINARY = skywalking-sidecar
+BINARY = skywalking-satellite
 
-RELEASE_BIN = skywalking-sidecar-$(VERSION)-bin
-RELEASE_SRC = skywalking-sidecar-$(VERSION)-src
+RELEASE_BIN = skywalking-satellite-$(VERSION)-bin
+RELEASE_SRC = skywalking-satellite-$(VERSION)-src
 
 OS = $(shell uname)
 
+SH = sh
 GO = go
+GIT = git
+PROTOC = protoc
 GO_PATH = $$($(GO) env GOPATH)
 GO_BUILD = $(GO) build
 GO_GET = $(GO) get
@@ -36,7 +39,7 @@ GO_BUILD_FLAGS = -v
 GO_BUILD_LDFLAGS = -X main.version=$(VERSION)
 GQL_GEN = $(GO_PATH)/bin/gqlgen
 
-PLATFORMS := windows linux darwin
+PLATFORMS := linux darwin
 os = $(word 1, $@)
 ARCH = amd64
 
@@ -44,25 +47,31 @@ SHELL = /bin/bash
 
 all: clean license deps lint test build
 
+.PHONY: tools
 tools:
 	$(GO_PACKR) -v || $(GO_GET) -u github.com/gobuffalo/packr/v2/...
-	$(GO_LINT) version || curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GO_PATH)/bin v1.21.0
+	$(GO_LINT) version || curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(GO_PATH)/bin v1.33.0
 	$(GO_LICENSER) -version || GO111MODULE=off $(GO_GET) -u github.com/elastic/go-licenser
+	$(PROTOC) --version || sh tools/install_protoc.sh
 
 deps: tools
 	$(GO_GET) -v -t -d ./...
+
+.PHONY: gen
+gen:
+	/bin/sh tools/protocol_gen.sh
 
 .PHONY: lint
 lint: tools
 	$(GO_LINT) run -v ./...
 
-.PHONE: test
+.PHONY: test
 test: clean lint
 	$(GO_TEST) ./... -coverprofile=coverage.txt -covermode=atomic
 
 .PHONY: license
 license: clean tools
-	$(GO_LICENSER) -d -licensor='Apache Software Foundation (ASF)' .
+	$(GO_LICENSER) -d -exclude=plugins/queue/mmap/queue_opreation.go -exclude=protocol/gen-codes -licensor='Apache Software Foundation (ASF)' ./
 
 .PHONY: verify
 verify: clean license lint test
@@ -71,3 +80,21 @@ verify: clean license lint test
 clean: tools
 	-rm -rf coverage.txt
 
+.PHONY: build
+build: deps linux darwin
+
+.PHONY: check
+check:
+	$(MAKE) clean
+	$(OUT_DIR)/skywalking-satellite-latest-linux-amd64 docs
+	$(GO) mod tidy &> /dev/null
+	@if [ ! -z "`git status -s |grep -v 'go.mod\|go.sum'`" ]; then \
+		echo "Following files are not consistent with CI:"; \
+		git status -s |grep -v 'go.mod\|go.sum'; \
+		exit 1; \
+	fi
+
+.PHONY: $(PLATFORMS)
+$(PLATFORMS):
+	mkdir -p $(OUT_DIR)
+	GOOS=$(os) GOARCH=$(ARCH) $(GO_BUILD) $(GO_BUILD_FLAGS) -ldflags "$(GO_BUILD_LDFLAGS)" -o $(OUT_DIR)/$(BINARY)-$(VERSION)-$(os)-$(ARCH) ./cmd
